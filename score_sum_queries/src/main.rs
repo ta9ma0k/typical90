@@ -3,7 +3,7 @@ fn main() {
         n: usize,
         a: [[i32; 2]; n],
         q: usize,
-        b: [[i32; 2]; q],
+        b: [[usize; 2]; q],
     }
     print_vec(&resolve(&a, &b));
 }
@@ -17,62 +17,71 @@ fn print_vec(list: &Vec<Vec<i32>>) {
     });
 }
 
-fn resolve(a: &Vec<Vec<i32>>, b: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+fn resolve(a: &Vec<Vec<i32>>, b: &Vec<Vec<usize>>) -> Vec<Vec<i32>> {
+    let list = split_list_by_class(&a)
+        .iter()
+        .map(|x| cumulative_sum(&x))
+        .collect::<Vec<Vec<i32>>>();
     b.iter()
         .map(|x| {
-            let start = x[0] as usize;
-            let end = x[1] as usize;
-            let list = split_list(&a, &start, &end);
-            score_sum(&list)
+            let end = x[1] - 1;
+            if x[0] == 1 {
+                vec![list[0][end], list[1][end]]
+            } else {
+                let start = x[0] - 2;
+                vec![list[0][end] - list[0][start], list[1][end] - list[1][start]]
+            }
         })
         .collect()
 }
 
-fn split_list(scores: &Vec<Vec<i32>>, start: &usize, end: &usize) -> Vec<Vec<i32>> {
-    let start_index = start - 1;
-    let end_index = end - 1;
-    scores
-        .iter()
+fn split_list_by_class(list: &Vec<Vec<i32>>) -> Vec<Vec<i32>> {
+    list.iter()
         .enumerate()
-        .filter(|(i, _)| &start_index <= i && i <= &end_index)
-        .map(|(_, x)| x.to_vec())
+        .fold(vec![vec![0; list.len()]; 2], |mut acc, (index, x)| {
+            let class_num = if x[0] == 1 { 0 } else { 1 };
+            acc[class_num][index] = x[1];
+            acc
+        })
+}
+
+
+fn cumulative_sum(list: &Vec<i32>) -> Vec<i32> {
+    list.iter()
+        .scan(0, |acc, x| {
+            *acc += x;
+            Some(*acc)
+        })
         .collect()
 }
 
-fn score_sum(list: &Vec<Vec<i32>>) -> Vec<i32> {
-    list.iter().fold(vec![0; 2], |mut acc, x| {
-        let index = if x[0] == 1 { 0 } else { 1 };
-        acc[index] += x[1];
-        acc
-    })
-}
-
 #[test]
-fn test_score_sum() {
+fn test_split_list_by_class() {
     assert_eq!(
-        score_sum(&vec![vec![1, 2], vec![2, 3], vec![1, 4]]),
-        vec![6, 3]
-    );
-}
-
-#[test]
-fn test_split_list() {
-    assert_eq!(
-        split_list(
-            &vec![vec![1, 2], vec![2, 3], vec![1, 4], vec![2, 5], vec![1, 6]],
-            &2,
-            &4
-        ),
-        vec![vec![2, 3], vec![1, 4], vec![2, 5]]
+        split_list_by_class(&vec![
+            vec![1, 10],
+            vec![1, 10],
+            vec![2, 10],
+            vec![1, 10],
+            vec![2, 10]
+        ]),
+        vec![vec![10, 10, 0, 10, 0], vec![0, 0, 10, 0, 10]]
     );
     assert_eq!(
-        split_list(
-            &vec![vec![1, 2], vec![2, 3], vec![1, 4], vec![2, 5], vec![1, 6]],
-            &1,
-            &2
-        ),
-        vec![vec![1, 2], vec![2, 3]]
-    )
+        split_list_by_class(&vec![vec![1, 10], vec![1, 10], vec![1, 10],]),
+        vec![vec![10, 10, 10], vec![0, 0, 0]]
+    );
+}
+#[test]
+fn test_cumulative_sum() {
+    assert_eq!(
+        cumulative_sum(&vec![10, 0, 10, 10, 10]),
+        vec![10, 10, 20, 30, 40]
+    );
+    assert_eq!(
+        cumulative_sum(&vec![10, 0, 0, 0, 10]),
+        vec![10, 10, 10, 10, 20]
+    );
 }
 
 #[test]
@@ -91,5 +100,12 @@ fn test_resolve() {
             &vec![vec![2, 6]]
         ),
         vec![vec![63, 261]]
-    )
+    );
+    assert_eq!(
+        resolve(
+            &vec![vec![1, 100], vec![1, 100], vec![1, 100],],
+            &vec![vec![1, 3]]
+        ),
+        vec![vec![300, 0]]
+    );
 }
