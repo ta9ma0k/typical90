@@ -1,8 +1,8 @@
 fn main() {
     proconio::input! {
-        a: u64,
-        b: u64,
-        c: u64,
+        a: i128,
+        b: u32,
+        c: i128,
     }
-    println!("{}", if a < c ^ b { "Yes" } else { "No" });
+    println!("{}", if a < c.pow(b) { "Yes" } else { "No" });
 }
