@@ -26,13 +26,23 @@ fn get_total_time_array(a: &Vec<Vec<i32>>, combinations: &Vec<Vec<usize>>) -> Ve
 fn get_combinations(n: usize, e_pairs: &Vec<(i32, i32)>) -> Vec<Vec<usize>> {
     (1..(n + 1))
         .permutations(n)
-        .filter(|perm| {
-            (1..n).fold(true, |acc, i| {
-                acc && !e_pairs.contains(&(perm[i - 1] as i32, perm[i] as i32))
-                    && !e_pairs.contains(&(perm[i] as i32, perm[i - 1] as i32))
-            })
-        })
+        .filter(|perm| not_exists_error_pair(perm, e_pairs))
         .collect()
+}
+
+fn not_exists_error_pair(combinations: &Vec<usize>, e_pairs: &Vec<(i32, i32)>) -> bool {
+    (1..combinations.len()).fold(true, |acc, i| {
+        acc && !e_pairs.contains(&(combinations[i - 1] as i32, combinations[i] as i32))
+            && !e_pairs.contains(&(combinations[i] as i32, combinations[i - 1] as i32))
+    })
+}
+
+#[test]
+fn test_not_exists_pair() {
+    assert!(!not_exists_error_pair(&vec![1, 2, 3], &vec![(1, 2)]));
+    assert!(!not_exists_error_pair(&vec![1, 2, 3], &vec![(1, 2), (1, 3)]));
+    assert!(!not_exists_error_pair(&vec![2, 1, 3], &vec![(1, 2)]));
+    assert!(not_exists_error_pair(&vec![1, 2, 3], &vec![(1, 3)]));
 }
 
 #[test]
