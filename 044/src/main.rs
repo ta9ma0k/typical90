@@ -3,28 +3,20 @@ fn main() {
         n: usize,
         q: usize,
         a: [i32; n],
-        mut t: [(i32, i32, i32); q],
+        t: [(i32, i32, i32); q],
     }
-    t.reverse();
-    let mut results = Vec::new();
-    for (x, y, z) in t {
-        match x {
-            1 => {
-                results = q1(results, y, z);
-            }
-            2 => {
-                results = q2(results, n as i32);
-            }
-            3 => {
-                results = q3(results, y);
-            }
+    t.iter()
+        .rev()
+        .fold(vec![], |acc, (x, y, z)| match x {
+            1 => q1(acc, *y, *z),
+            2 => q2(acc, n as i32),
+            3 => q3(acc, *y),
             _ => unreachable!(),
-        }
-    }
-    results.reverse();
-    results
+        })
         .iter()
-        .for_each(|x| println!("{}", a[*x as usize - 1]));
+        .rev()
+        .map(|x| *x as usize - 1)
+        .for_each(|x| println!("{}", a[x]));
 }
 
 fn q1(a: Vec<i32>, x: i32, y: i32) -> Vec<i32> {
