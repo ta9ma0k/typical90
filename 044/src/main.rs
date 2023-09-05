@@ -20,19 +20,15 @@ fn main() {
 }
 
 fn q1(a: Vec<i32>, x: i32, y: i32) -> Vec<i32> {
-    let mut a = a;
-    for i in 0..a.len() {
-        if a[i] == x {
-            a[i] = y;
-        } else if a[i] == y {
-            a[i] = x;
-        }
-    }
-    a
+    a.iter()
+        .map(|z| match x {
+            _ if *z == x => y,
+            _ if *z == y => x,
+            _ => *z,
+        })
+        .collect()
 }
 
-//aの値を全てデクリメントする
-//aの値が-1の場合はnにする
 fn q2(a: Vec<i32>, n: i32) -> Vec<i32> {
     a.iter()
         .map(|x| x - 1)
