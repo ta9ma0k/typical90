@@ -1,19 +1,23 @@
+use itertools::iproduct;
 fn main() {
     proconio::input! {
         n: usize,
-        a: [u64; n],
-        b: [u64; n],
-        c: [u64; n],
+        a: [usize; n],
+        b: [usize; n],
+        c: [usize; n],
     }
-    let mut cnt = 0;
-    for i in 0..n {
-        for j in 0..n {
-            for k in 0..n {
-                if (a[i] + b[j] + c[k]) % 46 == 0 {
-                    cnt += 1;
-                }
-            }
-        }
-    }
-    println!("{}", cnt);
+    let m = |x: Vec<usize>| {
+        x.into_iter().fold(vec![0i128; 46], |mut acc, x| {
+            acc[x % 46] += 1;
+            acc
+        })
+    };
+    let ma = m(a);
+    let mb = m(b);
+    let mc = m(c);
+    let result: i128 = iproduct!(0..46, 0..46, 0..46)
+        .filter(|&(i, j, k)| (i + j + k) % 46 == 0)
+        .map(|(i, j, k)| ma[i] * mb[j] * mc[k])
+        .sum();
+    println!("{}", result);
 }
