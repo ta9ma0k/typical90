@@ -1,26 +1,27 @@
 fn main() {
     proconio::input! {
-        n: u128,
-        l: u128
+        n: usize,
+        l: usize 
     }
-    let result = (0..=n/l).fold(0, |acc, i| acc + combination(get_steps(n, l, i), i));
-    println!("{}", result % 1_000_000_007);
+    let answer = recurrence_formula(n, l)[n - 1];
+    println!("{:?}", answer);
 }
 
-fn get_steps(n: u128, l: u128, l_step_count: u128) -> u128 {
-    n - (l * l_step_count) + l_step_count
-}
-
-fn combination(n: u128, r: u128) -> u128 {
-    factorial(n) / (factorial(r) * factorial(n - r))
-}
-
-fn factorial(n: u128) -> u128 {
-    (1..=n).product()
+fn recurrence_formula(n: usize, l: usize) -> Vec<usize> {
+    (0..n).into_iter()
+        .fold(vec![0; n], |mut acc, i| {
+            match i {
+                i if i < (l - 1) => acc[i] = 1,
+                i if i == (l - 1) => acc[i] = 2,
+                _ => acc[i] = (acc[i - 1] + acc[i - l]) % 1_000_000_007,
+            } 
+            acc
+        })
 }
 
 #[test]
-fn test_get_steps() {
-    assert_eq!(get_steps(3, 2, 1), 2);
-    assert_eq!(get_steps(3, 2, 0), 3);
+fn test_recurrence_formula() {
+    assert_eq!(recurrence_formula(3, 2), vec![1, 2, 3]);
+    assert_eq!(recurrence_formula(5, 2), vec![1, 2, 3, 5, 8]);
+    assert_eq!(recurrence_formula(5, 3), vec![1, 1, 2, 3, 4]);
 }
