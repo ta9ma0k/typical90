@@ -2,45 +2,78 @@ fn main() {
     proconio::input! {
         n: usize,
         q: usize,
-        mut elevations: [i64; n],
+        elevations: [i64; n],
         queries: [(usize, usize, i64); q],
     }
-    queries.iter()
-        .enumerate()
-        .fold(Vec::new(), |mut acc, (i, (start, end, value))| {
-            if i == 0 {
-                acc.push(crustal_deformation(elevations.clone(), *start, *end, *value));
-            } else {
-                acc.push(crustal_deformation(acc[i - 1].clone(), *start, *end, *value));
-            }
-            acc
-        })
-        .iter()
-        .map(|x| get_inconvenience(x))
-        .for_each(|x| println!("{}", x));
+    let mut floor_difference = FloorDifference::from_elevations(elevations);
+    for (start, end, value) in queries {
+        floor_difference.crustal_deformation(start, end, value);
+        println!("{}", floor_difference.inconvenience);
+    }
 }
 
-fn crustal_deformation(elevations: Vec<i64>, start: usize, end: usize, value: i64) -> Vec<i64> {
-    elevations.iter().enumerate().map(|(i, x)| match i {
-        i if i >= start - 1 && i <= end - 1 => x + value,
-        _ => *x,
-    }).collect()
+struct FloorDifference {
+    n: usize,
+    inconvenience: i64,
+    floor_difference: Vec<i64>,
 }
 
-fn get_inconvenience(elevations: &Vec<i64>) -> i64 {
-    (1..elevations.len()).fold(0, |acc, x| {
-        acc + (elevations[x - 1] - elevations[x]).abs()
-    })
+impl FloorDifference {
+    fn new(n: usize, inconvenience: i64, floor_difference: Vec<i64>) -> Self {
+        Self {
+            n,
+            inconvenience,
+            floor_difference,
+        }
+    }
+
+    fn from_elevations(elevations: Vec<i64>) -> Self {
+        let floor_difference = (1..elevations.len()).map(|x| elevations[x] - elevations[x - 1]);
+        Self::new(
+            elevations.len(),
+            floor_difference.clone().map(|x| x.abs()).sum(),
+            floor_difference.collect(),
+        )
+    }
+
+    fn crustal_deformation(&mut self, start: usize, end: usize, value: i64) {
+        if start - 1 > 0 {
+            let before = self.floor_difference[start - 2].abs();
+            self.floor_difference[start - 2] += value;
+            self.inconvenience += self.floor_difference[start - 2].abs() - before;
+        }
+        if end < self.n {
+            let before = self.floor_difference[end - 1].abs();
+            self.floor_difference[end - 1] -= value;
+            self.inconvenience += self.floor_difference[end - 1].abs() - before;
+        }
+    }
 }
 
 #[test]
-fn test_get_inconvenience() {
-    assert_eq!(get_inconvenience(&vec![1,3,4]), 3);
-    assert_eq!(get_inconvenience(&vec![0,2,4]), 4);
+fn test_case1() {
+    let mut sut = FloorDifference::from_elevations(vec![1, 2, 3]);
+    assert_eq!(sut.floor_difference, vec![1, 1]);
+    sut.crustal_deformation(2, 3, 1);
+    assert_eq!(sut.floor_difference, vec![2, 1]);
+    assert_eq!(sut.inconvenience, 3);
+}
+
+#[test]
+fn test_get_floor_difference() {
+    let sut1 = FloorDifference::from_elevations(vec![1, 2, 3]);
+    assert_eq!(sut1.floor_difference, vec![1, 1]);
+    assert_eq!(sut1.n, 3);
+    assert_eq!(sut1.inconvenience, 2);
+    let sut2 = FloorDifference::from_elevations(vec![3, 1, 4]);
+    assert_eq!(sut2.floor_difference, vec![-2, 3]);
+    assert_eq!(sut2.n, 3);
+    assert_eq!(sut2.inconvenience, 5);
 }
 
 #[test]
 fn test_crustal_deformation() {
-    assert_eq!(crustal_deformation(vec![1,2,3], 2, 3, 1), vec![1,3,4]);
-    assert_eq!(crustal_deformation(vec![1,3,4], 1, 2, -1), vec![0,2,4]);
+    let mut sut1 = FloorDifference::new(5, 12, vec![-2, 3, -3, 4]);
+    sut1.crustal_deformation(3, 4, 5);
+    assert_eq!(sut1.floor_difference, vec![-2, 8, -3, -1]);
 }
