@@ -23,6 +23,8 @@ if [ -d "$INDEX" ]; then
     exit 1
 fi
 
+NAME=$(echo "$NAME" | sed -e 's/ /_/g' | tr '[:upper:]' '[:lower:]')
+
 echo "Creating dir $INDEX"
 mkdir -p "$INDEX/src"
 CARGO_TOML_PATH="$INDEX/Cargo.toml"
