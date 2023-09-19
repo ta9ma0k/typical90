@@ -13,6 +13,11 @@ if [ -z "$INDEX" ]; then
     exit 1
 fi
 
+if [[ ! "$INDEX" =~ ^[0-9]{3}$ ]]; then
+    echo "Index must be a three digit numbers"
+    exit 1
+fi
+
 if [ -d "$INDEX" ]; then
     echo "Index dir already exists"
     exit 1
