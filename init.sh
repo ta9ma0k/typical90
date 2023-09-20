@@ -32,23 +32,26 @@ MAIN_PATH="$INDEX/src/main.rs"
 
 echo "Creating $CARGO_TOML_PATH"
 touch "$CARGO_TOML_PATH"
-echo "[package]" >> "$CARGO_TOML_PATH"
-echo "name = \"$NAME\"" >> "$CARGO_TOML_PATH"
-echo "version = \"0.1.0\"" >> "$CARGO_TOML_PATH"
-echo "authors = [\"$USER\"]" >> "$CARGO_TOML_PATH"
-echo "edition = \"2021\"" >> "$CARGO_TOML_PATH"
-echo "" >> "$CARGO_TOML_PATH"
-echo "[dependencies]" >> "$CARGO_TOML_PATH"
-echo "proconio = \"0.3.6\"" >> "$CARGO_TOML_PATH"
+cat <<EOF > "$CARGO_TOML_PATH"
+[package]
+name = "$NAME"
+version = "0.1.0"
+authors = ["$USER"]
+edition = "2021"
+
+[dependencies]
+proconio = "0.3.6"
+EOF
 
 echo "Creating $MAIN_PATH"
 touch "$MAIN_PATH"
-echo "use proconio::input;" >> "$MAIN_PATH"
-echo "" >> "$MAIN_PATH"
-echo "fn main() {" >> "$MAIN_PATH"
-echo "    input! {" >> "$MAIN_PATH"
-echo "        n: usize," >> "$MAIN_PATH"
-echo "    }" >> "$MAIN_PATH"
-echo "    println!(\"{}\", n);" >> "$MAIN_PATH"
-echo "}" >> "$MAIN_PATH"
+cat <<EOF > "$MAIN_PATH"
+use proconio::input;
 
+fn main() {
+    input! {
+        n: usize,
+    }
+    println!("{}", n);
+}
+EOF
