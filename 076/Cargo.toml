@@ -1,0 +1,8 @@
+[package]
+name = "cake_cut"
+version = "0.1.0"
+authors = ["t-okada"]
+edition = "2021"
+
+[dependencies]
+proconio = "0.3.6"
