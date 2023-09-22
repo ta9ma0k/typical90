@@ -1,0 +1,8 @@
+[package]
+name = "sign_up_requests"
+version = "0.1.0"
+authors = ["ec2-user"]
+edition = "2021"
+
+[dependencies]
+proconio = "0.3.6"
