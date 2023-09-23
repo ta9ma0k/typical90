@@ -1,5 +1,5 @@
 use proconio::input;
-use std::collections::HashSet;
+use std::collections::HashMap;
 
 fn main() {
     input! {
@@ -10,14 +10,18 @@ fn main() {
 }
 
 fn register(requests: &Vec<String>) -> Vec<usize> {
-    let mut result = vec![];
-    let mut member_set: HashSet<&str> = HashSet::new();
-    for i in 0..requests.len() {
-        if member_set.insert(&requests[i]) {
-            result.push(i);
-        }
-    }
-    result
+    let mut res: Vec<usize> = requests
+        .iter()
+        .enumerate()
+        .fold(HashMap::new(), |mut acc, (i, val)| {
+            acc.entry(val).or_insert(i);
+            acc
+        })
+        .values()
+        .cloned()
+        .collect();
+    res.sort();
+    res
 }
 
 #[test]
