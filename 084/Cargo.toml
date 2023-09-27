@@ -1,0 +1,8 @@
+[package]
+name = "there_are_two_types_of_characters"
+version = "0.1.0"
+authors = ["t-okada"]
+edition = "2021"
+
+[dependencies]
+proconio = "0.3.6"
