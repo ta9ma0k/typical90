@@ -1,53 +1,92 @@
-use itertools::Itertools;
 use proconio::input;
 
 fn main() {
     input! {
-        (n, l): (usize, u128),
-        k: usize,
-        a: [u128; n],
+        (n, l): (usize, u32),
+        k: u32,
+        a: [u32; n],
     }
-    println!("{}", resolve(a, l, k).unwrap());
+    let yokan = Youkan::new(l, a);
+    println!("{}", resolve(&yokan, k));
 }
 
-fn resolve(a: Vec<u128>, l: u128, k: usize) -> Option<u128> {
-    cut_combinations(a, k, l)
-        .into_iter()
-        .map(|v| pice_length_vec(v))
-        .flat_map(|v| v.into_iter().min())
-        .max()
+struct BinaryTree {
+    left: i32,
+    right: i32,
+}
+
+impl BinaryTree {
+    fn init(l: u32) -> Self {
+        Self {
+            left: -1,
+            right: (l + 1) as i32,
+        }
+    }
+
+    fn set_left(&mut self, x: u32) {
+        self.left = x as i32;
+    }
+    fn set_right(&mut self, x: u32) {
+        self.right = x as i32;
+    }
+    fn is_valid(&self) -> bool {
+        self.right - self.left > 1
+    }
+    fn total(&self) -> u32 {
+        (self.right + self.left) as u32
+    }
+}
+
+fn resolve(yokan: &Youkan, k: u32) -> u32 {
+    let mut binary_tree = BinaryTree::init(yokan.length);
+    while binary_tree.is_valid() {
+        let mid = binary_tree.total() / 2;
+        if yokan.count_slice_piece(mid) >= k + 1 {
+            binary_tree.set_left(mid);
+        } else {
+            binary_tree.set_right(mid);
+        }
+    }
+    binary_tree.left as u32
 }
 
 #[test]
 fn test_resolve() {
-    assert_eq!(resolve(vec![8, 13, 26], 34, 1), Some(13));
+    let yokan = Youkan::new(34, vec![8, 13, 26]);
+    assert_eq!(resolve(&yokan, 1), 13);
 }
 
-fn pice_length_vec(a: Vec<u128>) -> Vec<u128> {
-    a.iter().tuple_windows().map(|(x, y)| y - x).collect_vec()
+struct Youkan {
+    length: u32,
+    break_points: Vec<u32>,
+}
+
+impl Youkan {
+    fn new(length: u32, break_points: Vec<u32>) -> Self {
+        Self {
+            length,
+            break_points,
+        }
+    }
+
+    fn count_slice_piece(&self, size: u32) -> u32 {
+        let mut count = 0;
+        let mut prev = 0;
+        for &p in &self.break_points {
+            if p - prev >= size {
+                count += 1;
+                prev = p;
+            }
+        }
+        if self.length - prev >= size {
+            count += 1;
+        }
+        count
+    }
 }
 
 #[test]
-fn test_pice_length_vec() {
-    assert_eq!(pice_length_vec(vec![0, 8, 34]), vec![8, 26]);
-    assert_eq!(pice_length_vec(vec![0, 13, 34]), vec![13, 21]);
-}
-
-fn cut_combinations(a: Vec<u128>, k: usize, l: u128) -> Vec<Vec<u128>> {
-    a.into_iter()
-        .combinations(k)
-        .map(|mut v| {
-            v.insert(0, 0);
-            v.push(l);
-            v
-        })
-        .collect_vec()
-}
-
-#[test]
-fn test_cut_combinations() {
-    assert_eq!(
-        cut_combinations(vec![8, 13, 26], 1, 34),
-        vec![vec![0, 8, 34], vec![0, 13, 34], vec![0, 26, 34]]
-    );
+fn test_count_slice_piece() {
+    let sut = super::Youkan::new(10, vec![2, 4, 7]);
+    assert_eq!(sut.count_slice_piece(3), 3);
 }
