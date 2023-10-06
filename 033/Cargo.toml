@@ -1,0 +1,8 @@
+[package]
+name = "not_too_bright"
+version = "0.1.0"
+authors = ["takuma"]
+edition = "2021"
+
+[dependencies]
+proconio = "0.3.6"
